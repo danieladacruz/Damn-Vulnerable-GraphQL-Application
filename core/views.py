@@ -41,6 +41,7 @@ from core.helpers import get_identity
 from app import app, db
 
 from version import VERSION
+from urllib import parse, request
 from config import WEB_HOST, WEB_PORT
 
 # SQLAlchemy Types
@@ -207,8 +208,15 @@ class ImportPaste(graphene.Mutation):
     scheme = graphene.String(required=True)
 
   def mutate(self, info, host='pastebin.com', port=443, path='/', scheme="http"):
-    url = security.strip_dangerous_characters(f"{scheme}://{host}:{port}{path}")
-    cmd = helpers.run_cmd(f'curl --insecure {url}')
+    # Validate and construct URL safely
+    url_parts = parse.urlparse(f"{scheme}://{host}:{port}{path}")
+    safe_url = parse.urlunparse(url_parts)
+    
+    try:
+        with request.urlopen(safe_url, timeout=10) as response:
+            cmd = response.read().decode('utf-8')
+    except Exception as e:
+        cmd = str(e)
 
     owner = Owner.query.filter_by(name='DVGAUser').first()
     Paste.create_paste(
