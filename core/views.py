@@ -368,8 +368,20 @@ class Query(graphene.ObjectType):
     )
 
   def resolve_users(self, info, id=None):
+    # Verify authorization using token from context
+    if not info.context.headers.get('Authorization'):
+      raise GraphQLError("Authorization required")
+    
+    token = info.context.headers['Authorization'].split()[1]
+    identity = get_identity(token)
+    
+    # Only admin can access user data
+    if identity != 'admin':
+      raise GraphQLError("Not authorized to access user data")
+
     query = UserObject.get_query(info)
     Audit.create_audit_entry(info)
+    
     if id:
       result = query.filter_by(id=id)
     else:
