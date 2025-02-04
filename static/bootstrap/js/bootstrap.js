@@ -180,7 +180,13 @@
           var value = config[property];
           var valueType = value && Util.isElement(value) ? 'element' : toType(value);
 
-          if (!new RegExp(expectedTypes).test(valueType)) {
+          // Validate expected types pattern before using in RegExp
+          if (!/^[\w\s|()-]+$/.test(expectedTypes)) {
+            throw new Error(componentName.toUpperCase() + ": Invalid expected types pattern");
+          }
+          
+          // Now safe to use in RegExp
+          if (!new RegExp('^(' + expectedTypes + ')$').test(valueType)) {
             throw new Error(componentName.toUpperCase() + ": " + ("Option \"" + property + "\" provided type \"" + valueType + "\" ") + ("but expected type \"" + expectedTypes + "\"."));
           }
         }
