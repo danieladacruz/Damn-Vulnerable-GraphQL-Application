@@ -317,7 +317,9 @@ class Query(graphene.ObjectType):
     result = query.filter_by(public=public, burn=False)
 
     if filter:
-      result = result.filter(text("title = '%s' or content = '%s'" % (filter, filter)))
+      result = result.filter(Paste.title == filter).union(
+        result.filter(Paste.content == filter)
+      )
 
     return result.order_by(Paste.id.desc()).limit(limit)
 
