@@ -351,7 +351,13 @@ class Query(graphene.ObjectType):
   def resolve_system_debug(self, info, arg=None):
     Audit.create_audit_entry(info)
     if arg:
-      output = helpers.run_cmd('ps {}'.format(arg))
+      # Validate arg contains only alphanumeric chars and common ps flags
+      if not all(c.isalnum() or c in '-_' for c in arg):
+        return "Error: Invalid characters in argument"
+      # Limit length to prevent very long inputs
+      if len(arg) > 32:
+        return "Error: Argument too long"
+      output = helpers.run_cmd('ps ' + arg)
     else:
       output = helpers.run_cmd('ps')
     return output
