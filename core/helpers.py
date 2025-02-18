@@ -22,7 +22,8 @@ def get_identity(token):
 
 def save_file(filename, text):
   try:
-    f = open(WEB_UPLOADDIR + filename, 'w')
+    safe_filename = os.path.basename(filename)
+    f = open(os.path.join(WEB_UPLOADDIR, safe_filename), 'w')
     f.write(text)
     f.close()
   except Exception as e:
