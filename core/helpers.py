@@ -1,12 +1,17 @@
 import base64
 import uuid
 import os
+import subprocess
 from config import WEB_UPLOADDIR
 from jwt import decode
 from core.models import ServerMode
 
 def run_cmd(cmd):
-  return os.popen(cmd).read()
+  try:
+    result = subprocess.run(cmd.split(), capture_output=True, text=True, check=True)
+    return result.stdout
+  except subprocess.CalledProcessError as e:
+    return str(e)
 
 def initialize():
   return run_cmd('python3 setup.py')
