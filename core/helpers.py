@@ -2,7 +2,7 @@ import base64
 import uuid
 import os
 from config import WEB_UPLOADDIR
-from jwt import decode
+from jwt import decode, InvalidTokenError
 from core.models import ServerMode
 
 def run_cmd(cmd):
@@ -18,7 +18,10 @@ def decode_base64(text):
   return base64.b64decode(text).decode('utf-8')
 
 def get_identity(token):
-  return decode(token, options={"verify_signature":False, "verify_exp":False}).get('identity')
+  try:
+    return decode(token, options={"verify_signature": True, "verify_exp": True}).get('identity')
+  except InvalidTokenError:
+    return None
 
 def save_file(filename, text):
   try:
