@@ -283,17 +283,29 @@ class Query(graphene.ObjectType):
   def resolve_me(self, info, token):
     Audit.create_audit_entry(info)
 
-    identity = get_identity(token)
+    try:
+      # Verify and decode the token
+      decoded_token = decode_token(token)
+      if not decoded_token:
+        raise GraphQLError("Invalid token")
 
-    if info.context.json == None:
-      raise GraphQLError("JSON payload was not found.")
+      identity = decoded_token['identity']
 
-    info.context.json['identity'] = identity
+      if info.context.json == None:
+        raise GraphQLError("JSON payload was not found.")
 
-    query = UserObject.get_query(info)
+      info.context.json['identity'] = identity
 
-    result = query.filter_by(username=identity).first()
-    return result
+      query = UserObject.get_query(info)
+      result = query.filter_by(username=identity).first()
+      
+      if not result:
+        raise GraphQLError("User not found")
+        
+      return result
+
+    except Exception as e:
+      raise GraphQLError(f"Authentication error: {str(e)}")
 
   def resolve_search(self, info, keyword=None):
     Audit.create_audit_entry(info)
