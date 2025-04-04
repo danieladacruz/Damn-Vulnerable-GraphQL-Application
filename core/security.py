@@ -1,14 +1,14 @@
 import config
-import random
 import ipaddress
 import time
 
 from core import helpers
+import secrets
 
 def simulate_load():
   loads = [200, 300, 400, 500]
   count = 0
-  limit = random.choice(loads)
+  limit = secrets.choice(loads)
   while True:
     time.sleep(0.1)
     count += 1
