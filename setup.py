@@ -2,7 +2,6 @@ import sys
 import os
 import shutil
 import config
-import random
 
 from ipaddress import IPv4Network
 
@@ -13,6 +12,7 @@ from db.agents import agents
 from db.owners import owners
 from db.titles import titles
 from db.content import content
+import secrets
 
 def clean_up():
   if os.path.exists(config.WEB_UPLOADDIR):
@@ -30,29 +30,29 @@ def clean_up():
   return
 
 def random_title():
-  return random.choice(titles)
+  return secrets.choice(titles)
 
 def random_content():
-  return random.choice(content)
+  return secrets.choice(content)
 
 def random_owner():
-  return random.choice(owners)
+  return secrets.choice(owners)
 
 def random_address():
   addresses = []
   for addr in IPv4Network('215.0.2.0/24'):
     addresses.append(str(addr))
-  return random.choice(addresses)
+  return secrets.choice(addresses)
 
 def random_password():
   weak_passwords = ['changeme']
-  return random.choice(weak_passwords)
+  return secrets.choice(weak_passwords)
 
 def random_useragent():
   user_agents = []
   for uas in agents:
     user_agents.append(uas)
-  return random.choice(user_agents)
+  return secrets.choice(user_agents)
 
 def pump_db():
   print('Populating Database')
